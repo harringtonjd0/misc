@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+	<head>
+		<link rel="stylesheet" href='/static/style.css' />
+	</head>
+
+	<body>
+		<h1 align="center"> Raspberry Pi </h1>
+		<img src="/static/raspberry-pi-logo.png" class="center" align="middle">
+		<h4 align="center"> Server Time: {{ time }} </h4>
+	
+		<h3> Reminders </h3>
+		<ul>
+			{% for item in reminders %}	
+			<li> {{ item }} </li>
+			{% endfor %}
+		</ul>
+	</body>
+</html>
