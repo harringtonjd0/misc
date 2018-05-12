@@ -1,10 +1,20 @@
 #!/usr/bin/env python3
 
+''' Run local web app on Raspberry Pi. Used to manage reminder service and additional functions
+    will be added later. Twilio is used to manage reminder service with SMS messages.
+
+    Note: Run concurrently with 'ngrok http 5000' or 'ssh -R 80:localhost:5000 serveo.net'
+    to expose local webserver to the Internet.  Note that in order for SMS interaction to work,
+    Twilio must be given the webhook to forward messages to. After beginnging ngrok or serveo
+    session, change messaging webhook URL in Twilio console. '''
+
+import os, sys
 import subprocess
 import datetime
+from functools import wraps
 
 try:
-    from flask import Flask, render_template, request, redirect
+    from flask import Flask, render_template, request, Response
     from twilio.twiml.messaging_response import MessagingResponse
 except ImportError as err:
     print("[!] Twilio and Flask are required: {}".format(err))
@@ -12,14 +22,41 @@ except ImportError as err:
 
 app = Flask(__name__)
 
+def check_auth(username, password):
+    ''' Check if a username / password combo is valid '''
+    try:
+
+        return username == os.environ['FLASK_USERNAME'] and password == os.environ['FLASK_PASS']
+    except:
+        print("[!] Couldn't find environment variables FLASK_USERNAME/FLASK_PASS")
+        sys.exit(1)
+
+def authenticate():
+    ''' Send a 401 response that enables basic auth '''
+    return Response(
+            'Could not verify your access.\n'
+            'Please supply valid credentials', 401,
+            {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    ''' Require authentication for function  '''
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
 def execute_reminder(cmd):
+    ''' Interact with reminders.py function to manage reminders'''
     try:
         cmd = cmd.split()
 
         # If -a, combine reminder into single list entry
-        if len(cmd) > 1 and cmd[1] == '-a':
-            cmd[2] = ''.join([cmd[x] for x in range(2, len(cmd))])
-            cmd = cmd[:3]
+        if len(cmd) > 2 and cmd[2] == '-a':
+            cmd[3] = ''.join([cmd[x] for x in range(3, len(cmd))])
+            cmd = cmd[:4]
         output = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
         # If error, print stderr. Else use stdout
@@ -32,6 +69,7 @@ def execute_reminder(cmd):
     return output
 
 @app.route('/')
+@requires_auth
 def index():
     ''' Render index.html '''
     
@@ -41,7 +79,7 @@ def index():
     
     # Get reminder list and add to webpage
     try:
-        output = subprocess.run(['/opt/reminders/reminders.py'], stdout=subprocess.PIPE).stdout.decode()
+        output = subprocess.run(['python3', 'reminders.py'], stdout=subprocess.PIPE).stdout.decode()
         reminders = output.split(':')[1]
         reminders = reminders.split('\n\n')
     
@@ -75,12 +113,12 @@ def sms_reply():
     if 'remindme' in body or 'Remindme' in body:
         
         if body[0] == 'r':
-            abody = body.replace('remindme', '/opt/reminders/reminders.py')
+            body = body.replace('remindme', 'python3 reminders.py')
         elif body[0] == 'R':
-            abody = body.replace('Remindme', '/opt/reminders/reminders.py')
+            body = body.replace('Remindme', 'python3 reminders.py')
         else:
             message += "\n\nSorry, I couldn't understand your message."
-        message += execute_reminder(abody)
+        message += execute_reminder(body)
     
     # If greeting, reply with greeting
     elif any(x in body.lower() for x in {'hi', 'hello', 'hey'}):
