@@ -1,0 +1,72 @@
+#!/bin/bash
+
+## Start Flask web app and Serveo.net forwarding to expose web app to Internet
+
+# If no parameters given, print usage
+if [ "$1" = "" ]; then
+	echo "Usage: $0 [ start | stop | status ]"
+	exit 1
+fi
+
+# Colors for output
+RED='\033[1;31m'
+NC='\033[0m'
+GREEN='\033[1;32m'
+
+# Get PID of services if running. Empty if not running.
+autossh_pid=$(ps -elf | grep -v grep | grep autossh | awk '{ print $4 }')
+server_pid=$(ps -elf | grep -v grep | grep server.py | grep -v /usr/bin | awk '{ print $4  }')
+	
+# If 'status', print status
+if [ "$1" = "status" ]; then
+	if [ "$server_pid" = ""  ]; then
+		echo -e "[+] Server is ${RED}down${NC}."
+	else
+		echo -e "[+] Server is ${GREEN}up${NC}. (PID $server_pid)"
+	fi
+
+	if [ "$autossh_pid" = ""  ]; then
+		echo -e "[+] Serveo SSH forwarding is ${RED}down${NC}."
+	else
+		echo -e "[+] Serveo SSH forwarding is ${GREEN}up${NC}. (PID $autossh_pid)"
+	fi
+
+# If 'start', start service
+elif [ "$1" = "start" ]; then
+	if [ "$server_pid" = "" ]; then
+		python3 /opt/assistant/app/server.py >> /opt/assistant/log/assistant_server.log 2>&1 &
+		echo "[+] Started Flask server"
+	fi
+	
+	if [ "$autossh_pid" = "" ]; then
+		autossh -R 80:localhost:1776 serveo.net >> /opt/assistant/log/assistant_autossh.log 2>&1 &
+		echo "[+] Started Serveo SSH forwarding."
+	fi	
+	
+	if [ "$autossh_pid" != "" -a "$server_pid" != "" ]; then
+		echo "[!] Service already running."
+	fi
+
+# If 'stop', kill service
+elif [ "$1" = "stop" ]; then
+	if [ "$server_pid" != "" ]; then
+		kill $server_pid
+		echo "[*] Killed Flask server."
+	fi
+
+	if [ "$autossh_pid" != "" ]; then
+		kill $autossh_pid
+		echo "[*] Killed Serveo SSH forwarding."
+		fi
+	if [ "$autossh_pid" = "" -a "$server_pid" = ""  ]; then
+		echo "[!] Service not running."
+	fi
+	
+
+# Else print usage
+else
+	echo "Usage: $0 [ <empty> | start | stop | status ]"
+	exit 1
+fi
+
+exit 0
