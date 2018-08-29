@@ -3,9 +3,26 @@
  */
 
 #include "helper.h"
+#include "built_ins.h"
 
-// void? find_command()
-// void? execute_command()
+/**
+ * Handle errors and exit program.
+ *
+ * @param errmsg The string to print in the error message.
+ * @param rc The return code to exit the program with.
+ */
+
+void custom_error(std::string errmsg, int rc)
+{
+	// Output custom error message
+	const char* strerror_msg = std::strerror(errno);
+	std::cerr << "[!] ERROR: " << errmsg << "\n\t==> [Errno " << errno << "] "
+	      	<< strerror_msg << "\n";
+	
+	// Exit program with given error code
+	exit(rc);
+
+}
 
 /** 
  * Get environment variable by name
@@ -34,7 +51,7 @@ std::vector<std::string> tokenize_string(std::string input, std::string delim)
 {
 	// Parse string by spaces
 	std::string token;
-	unsigned int index = 0;
+	size_t index = 0;
 	std::vector <std::string> tokenized_input;
 
 	while ( (index = input.find(delim)) != std::string::npos)

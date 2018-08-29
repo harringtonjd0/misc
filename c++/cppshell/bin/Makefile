@@ -1,5 +1,5 @@
 CC= g++
-CFLAGS= -Wall
+CFLAGS= -Wall -std=c++11
 
 # Directory paths for *.c and *.h files
 source= ../src/source/

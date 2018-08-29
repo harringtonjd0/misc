@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
 {
 	// Set of built in functions
 	std::set<std::string> builtins = { "exit", "cd" };
-
+	
 	while (1)
 	{
 		/// Take and parse user input
@@ -19,27 +19,24 @@ int main(int argc, char* argv[])
 		std::string input;
 		std::cout << "[>] ";
 		getline(std::cin, input);
-
+		
 		// Parse string by spaces
 		std::vector<std::string> tokenized_input = tokenize_string(input, " ");
-
+		
 		// Take first token as command name and remove from vector
 		std::string command = tokenized_input[0];
 		tokenized_input.erase(tokenized_input.begin());
 		
-		/// TODO Search for command executable
-		///  Move to separate function!
+		/// Search for command executable
 
-		// First search for built-ins
+		// First, search for built-ins
 		if ( (builtins.find(command)) != builtins.end() )	
 		{
 			// Command found in builtins. Execute builtin.
-			int rc;
 			if ( command == "cd")
-				rc = shell_cd(tokenized_input);
-			std::cout << rc << "\n";
-			//else
-			//	shell_cd(tokenized_input);
+				shell_cd(tokenized_input);
+			else
+				shell_exit(0);
 		}
 		
 		// Second search for executables in PATH 
@@ -75,6 +72,7 @@ int main(int argc, char* argv[])
 				}
 			}
 	*/
+			std::cout << "Command not found.\n";
 		}
 		/// TODO Execute command and return output
 	} // End main while
