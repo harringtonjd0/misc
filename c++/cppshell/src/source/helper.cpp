@@ -18,15 +18,15 @@ void custom_error(std::string errmsg, int rc)
 	const char* strerror_msg = std::strerror(errno);
 	std::cerr << "[!] ERROR: " << errmsg << "\n\t==> [Errno " << errno << "] "
 	      	<< strerror_msg << "\n";
-	
+
 	// Exit program with given error code
 	exit(rc);
 
 }
 
-/** 
+/**
  * Get environment variable by name
- * 
+ *
  * @param key The name of the environment variable to access
  * @return String containing environment variable contents
  *
@@ -58,7 +58,7 @@ std::vector<std::string> tokenize_string(std::string input, std::string delim)
 	{
 		// Get string in between spaces
 		token = input.substr(0, index);
-		
+
 		// Put token in vector
 		tokenized_input.push_back(token);
 
@@ -66,7 +66,7 @@ std::vector<std::string> tokenize_string(std::string input, std::string delim)
 		input.erase(0, index += delim.length());
 
 	} // End input parse while
-	
+
 	// Place final string in vector
 	tokenized_input.push_back(input);
 
@@ -74,4 +74,38 @@ std::vector<std::string> tokenize_string(std::string input, std::string delim)
 	return tokenized_input;
 }
 
+/**
+ *	Execute command with fork() and execvp()
+ *
+ *	@param command The command to execute
+ *	@param args The tokenized vector of arguments to pass to the executable
+ *
+ */
 
+void shell_execute(std::string command, std::vector<std::string> args)
+{
+	const char* argv[] = { "ls", "-la", NULL };
+
+	pid_t child_pid;
+	int child_status;
+
+	if ( (child_pid= fork()) < 0)
+	{
+		std::cout << "Failed to fork.\n";
+		exit(1);
+	}
+	else if (child_pid== 0)
+	{
+		if ( execvp( (const char*) argv[0],  (char* const*) argv) < 0 )
+		{
+			std::cout << "Failed to exec.\n";
+			exit(2);
+		}
+	}
+	else
+	{
+		while ( wait(&child_status) != child_pid)
+			;
+	}
+
+}

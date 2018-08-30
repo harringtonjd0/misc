@@ -1,4 +1,4 @@
-/** 
+/**
  * 	Header for helper.c.
  * 	Contains all includes used by cppshell.
  */
@@ -13,6 +13,8 @@
 #include <set>
 #include <cerrno>
 #include <cstring> // strerror()
+#include <unistd.h>
+#include <sys/wait.h>
 
 std::string get_env_var(std::string const& key);
 std::vector<std::string> tokenize_string(std::string input, std::string delim);
