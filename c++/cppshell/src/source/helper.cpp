@@ -87,26 +87,15 @@ void shell_execute(std::vector<std::string> arg_vector)
 	// Const char array to pass execvp()
 	const char* argv[arg_vector.size() + 1];
 
-
 	// Convert args vector to array of strings
-	unsigned int i;
+	size_t i;
 	for (i = 0; i < arg_vector.size(); i++)
 	{
 		argv[i] = arg_vector[i].c_str();
 	}
 
-	std::cout << "assigned args in argv\n";
-
-
 	// Null terminate array
-	argv[arg_vector.size() + 1] = NULL;
-	std::cout << "Null terminated argv\n";
-
-	/////////////////////////
-	for (size_t i = 0; i < (arg_vector.size() + 1); i++)
-	{
-		std::cout << argv[i];
-	}
+	argv[i] = NULL;
 
 	// Control variables for forked process	pid_t child_pid;
 	pid_t child_pid;
@@ -128,6 +117,6 @@ void shell_execute(std::vector<std::string> arg_vector)
 	else
 	{
 		while ( wait(&child_status) != child_pid)
-		;
+			;
 	}
 } // end shell_execute()

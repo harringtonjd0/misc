@@ -1,6 +1,6 @@
 /**
  * Basic Linux shell implementation using C++ done for learning experience.
- * Work in progress.
+ * Could use plenty of improvement (error/signal handling, etc)
  */
 
 #include "helper.h"
@@ -25,7 +25,6 @@ int main(int argc, char* argv[])
 
 		// Take first token as command name and remove from vector
 		std::string command = tokenized_input[0];
-		//tokenized_input.erase(tokenized_input.begin());
 
 		/// Search for command executable
 
@@ -54,9 +53,10 @@ int main(int argc, char* argv[])
 			DIR* dir;
 			struct dirent* entry;
 
+			int found = 0;
+
 			// For each directory in path...
-			unsigned int i;
-			for (i = 0; i < tokenized_path_vector.size(); i++)
+			for (size_t i = 0; i < tokenized_path_vector.size(); i++)
 			{
 				// Open the directory
 				if ( (dir = opendir( (const char*) tokenized_path_vector[i].c_str())) != NULL )
@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
 						// Check if entry is the desired executable and execute
 						if (entry->d_name == command)
 						{
+							found = 1;
 							shell_execute(tokenized_input);
 							break;
 						}
@@ -74,8 +75,9 @@ int main(int argc, char* argv[])
 					closedir(dir);
 				}
 			}
-
-		}
+			if (found == 0)
+				std::cerr << "Command not found.\n";
+		} // End command search and execution
 	} // End main while
 
 	return 0;

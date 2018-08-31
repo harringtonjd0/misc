@@ -19,7 +19,7 @@ void shell_cd(std::vector<std::string> args)
 
 	// Print usage if incorrect number of args
 	std::string  usage = "Usage: cd directory\n";
-	if ( (args.size() < 1) or (args.size() > 2 ) )
+	if ( args.size() != 2 )
 		std::cerr << usage;
 
 	// Move to new directory
