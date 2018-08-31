@@ -72,7 +72,7 @@ std::vector<std::string> tokenize_string(std::string input, std::string delim)
 
 	// Return vector of tokenized strings
 	return tokenized_input;
-}
+} // end tokenize_string()
 
 /**
  *	Execute command with fork() and execvp()
@@ -82,30 +82,52 @@ std::vector<std::string> tokenize_string(std::string input, std::string delim)
  *
  */
 
-void shell_execute(std::string command, std::vector<std::string> args)
+void shell_execute(std::vector<std::string> arg_vector)
 {
-	const char* argv[] = { "ls", "-la", NULL };
+	// Const char array to pass execvp()
+	const char* argv[arg_vector.size() + 1];
 
+
+	// Convert args vector to array of strings
+	unsigned int i;
+	for (i = 0; i < arg_vector.size(); i++)
+	{
+		argv[i] = arg_vector[i].c_str();
+	}
+
+	std::cout << "assigned args in argv\n";
+
+
+	// Null terminate array
+	argv[arg_vector.size() + 1] = NULL;
+	std::cout << "Null terminated argv\n";
+
+	/////////////////////////
+	for (size_t i = 0; i < (arg_vector.size() + 1); i++)
+	{
+		std::cout << argv[i];
+	}
+
+	// Control variables for forked process	pid_t child_pid;
 	pid_t child_pid;
 	int child_status;
 
+	// Fork child process
 	if ( (child_pid= fork()) < 0)
+		custom_error("Failed to fork.\n", 1);
+
+	// If pid is 0, this is the child process
+	else if (child_pid == 0)
 	{
-		std::cout << "Failed to fork.\n";
-		exit(1);
-	}
-	else if (child_pid== 0)
-	{
+		// Use execvp to replace forked child with command
 		if ( execvp( (const char*) argv[0],  (char* const*) argv) < 0 )
-		{
-			std::cout << "Failed to exec.\n";
-			exit(2);
-		}
+			custom_error("Failed to exec.\n", 1);
 	}
+
+	// Else this is the parent. Wait for child to return
 	else
 	{
 		while ( wait(&child_status) != child_pid)
-			;
+		;
 	}
-
-}
+} // end shell_execute()

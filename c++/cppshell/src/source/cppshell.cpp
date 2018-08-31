@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
 		// Take first token as command name and remove from vector
 		std::string command = tokenized_input[0];
-		tokenized_input.erase(tokenized_input.begin());
+		//tokenized_input.erase(tokenized_input.begin());
 
 		/// Search for command executable
 
@@ -50,29 +50,32 @@ int main(int argc, char* argv[])
 				tokenize_string(stdstring_path, ":");
 
 
-			// Search PATH
-		/*	DIR* dir;
-			struct dirent *entry;
+			// Search PATH. Probably not necessary, but good learning exercise
+			DIR* dir;
+			struct dirent* entry;
 
 			// For each directory in path...
-			for (int i = 0; i < tokenized_path_vector.size(); i++)
+			unsigned int i;
+			for (i = 0; i < tokenized_path_vector.size(); i++)
 			{
 				// Open the directory
-				if ( (dir = opendir(tokenized_path_vector[i])) != NULL )
+				if ( (dir = opendir( (const char*) tokenized_path_vector[i].c_str())) != NULL )
 				{
 					// For each entry in the directory...
 					while ( (entry = readdir(dir)) != NULL )
 					{
-						// Check if entry is the desired executable
-						if (entry == command)
-
+						// Check if entry is the desired executable and execute
+						if (entry->d_name == command)
+						{
+							shell_execute(tokenized_input);
+							break;
+						}
 					}
 					closedir(dir);
 				}
 			}
-		*/	std::cout << "Command not found.\n";
+
 		}
-		/// TODO Execute command and return output
 	} // End main while
 
 	return 0;
