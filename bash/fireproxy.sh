@@ -69,7 +69,7 @@ monitor_firefox()
 cleanup() 
 {
 	sed -i '/network.proxy.http/d' $prefs_js
-	kill -9 $1
+	kill $1
 }
 
 # Terminate function -- Ensure cleanup happens and exit. 
